@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: itsmesohit/client:latest
+    container_name: client
+    ports:
+      - "3000:3000"
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: itsmesohit/server:latest
+    container_name: server
+    ports:
+      - "5000:5000"
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    image: itsmesohit/worker:latest
+    container_name: worker
