@@ -10,7 +10,7 @@ env:
 
 before_install:
   - docker pull python:3.9
-  - docker run -it --rm -v $PWD:/workspace -w /workspace python:3.9 bash -c "
+  - docker run -v $PWD:/workspace -w /workspace python:3.9 bash -c "
       curl https://sdk.cloud.google.com | bash;
       source $HOME/google-cloud-sdk/path.bash.inc;
       gcloud components update kubectl;
