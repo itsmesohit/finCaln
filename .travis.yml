@@ -3,41 +3,24 @@ sudo: required
 services:
   - docker
 
-before_install:
-  - docker pull python:3.9
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
-install:
-  - echo "Checking for existing Google Cloud SDK"
-  - |
-    if [ ! -d "$HOME/google-cloud-sdk" ]; then
-      echo "Google Cloud SDK not found, installing..."
-      curl -LO https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
-      tar -xf google-cloud-sdk-372.0.0-linux-x86_64.tar.gz -C $HOME
-      $HOME/google-cloud-sdk/install.sh -q
-      echo "Google Cloud SDK installed."
-    else
-      echo "Google Cloud SDK is cached."
-    fi
-  - echo "Sourcing Google Cloud SDK"
-  - |
-    if [ -f "$HOME/google-cloud-sdk/path.bash.inc" ]; then
-      source $HOME/google-cloud-sdk/path.bash.inc
-      echo "Google Cloud SDK sourced."
-    else
-      echo "Google Cloud SDK installation failed"
-      exit 1
-    fi
+before_install:
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
+  - curl -s https://sdk.cloud.google.com | bash > install.log
+  - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
   - gcloud config set project fincalc-430420
   - gcloud config set compute/zone us-central1
   - gcloud container clusters get-credentials autopilot-cluster-1
-
-before_script:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
 
 script:
-  - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
   - docker run -e CI=true itsmesohit/client-test npm test
 
 deploy:
@@ -45,7 +28,3 @@ deploy:
   script: bash ./deploy.sh
   on:
     branch: main
-
-cache:
-  directories:
-    - $HOME/google-cloud-sdk
