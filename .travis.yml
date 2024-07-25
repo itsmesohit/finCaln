@@ -3,6 +3,10 @@ sudo: required
 services:
   - docker
 
+language: python
+python:
+  - "3.8"
+
 env:
   global:
     - SHA=$(git rev-parse HEAD)
@@ -15,8 +19,7 @@ env:
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
-  - curl https://sdk.cloud.google.com > install.sh
-  - bash install.sh --disable-prompts --install-dir=$INSTALL_DIR
+  - curl -sSL https://sdk.cloud.google.com | bash -s -- --disable-prompts --install-dir=$INSTALL_DIR
   - export PATH=${INSTALL_DIR}/google-cloud-sdk/bin:${PATH}
   - gcloud --quiet components install kubectl
   - gcloud auth activate-service-account --key-file service-account.json
