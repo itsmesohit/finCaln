@@ -10,13 +10,15 @@ env:
 
 before_install:
   - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
-  - curl https://sdk.cloud.google.com | bash
-  - source $HOME/google-cloud-sdk/path.bash.inc
-  - gcloud components update kubectl
-  - gcloud auth activate-service-account --key-file service-account.json
-  - gcloud config set project fincalc-430420
-  - gcloud config set compute/zone us-central1
-  - gcloud container clusters get-credentials autopilot-cluster-1
+  - curl https://sdk.cloud.google.com | bash -s -- --disable-prompts > /dev/null
+  - export PATH=${HOME}/google-cloud-sdk/bin:${PATH}
+  - gcloud --quiet components install kubectl
+  - echo ${GCLOUD_SERVICE_KEY} | base64 --decode -i > ${HOME}/gcloud-service-key.json
+  - gcloud auth activate-service-account --key-file ${HOME}/gcloud-service-key.json
+  - gcloud --quiet config set project ${PROJECT_ID}
+  - gcloud --quiet config set container/cluster ${CLUSTER_NAME}
+  - gcloud --quiet config set compute/zone ${CLOUDSDK_COMPUTE_ZONE}
+  - gcloud --quiet container clusters get-credentials ${CLUSTER_NAME}
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
 
