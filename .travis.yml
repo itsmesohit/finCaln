@@ -8,7 +8,7 @@ before_install:
   - docker pull python:3.9
   
 install:
-  # Install Google Cloud SDK and Docker CLI
+  # Install Google Cloud SDK
   - curl https://sdk.cloud.google.com | bash
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
@@ -16,11 +16,14 @@ install:
   - gcloud config set project fincalc-430420
   - gcloud config set compute/zone us-central1
   - gcloud container clusters get-credentials autopilot-cluster-1
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
 script:
+  # Login to Docker registry
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  
   # Build Docker image
   - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
+  
   # Run tests
   - docker run -e CI=true itsmesohit/client-test npm test
 
