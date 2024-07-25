@@ -9,39 +9,20 @@ env:
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
-  # Add deadsnakes PPA and update package lists
-  - sudo add-apt-repository -y ppa:deadsnakes/ppa
-  - sudo apt-get update
-  
-  # Install Python 3.8 and related packages
-  - sudo apt-get install -y python3.8 python3.8-venv python3.8-dev
-
-  # Set Python 3.8 as the default
-  - sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
-  - sudo update-alternatives --set python3 /usr/bin/python3.8
-  - python3 --version  # Check the Python version
-
-  # Decrypt the service account JSON
-  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
-
-  # Install Google Cloud SDK
-  - curl https://sdk.cloud.google.com | bash > /dev/null
-  - source $HOME/google-cloud-sdk/path.bash.inc
-
-  # Update kubectl component
-  - gcloud components update kubectl
-
-  # Authenticate and configure gcloud
-  - gcloud auth activate-service-account --key-file service-account.json
-  - gcloud config set project fincalc-430420
-  - gcloud config set compute/zone us-central1
-  - gcloud container clusters get-credentials autopilot-cluster-1
-
-  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
-
-script:
-  - docker run -e CI=true itsmesohit/client-test npm test
+  - docker pull python:3.9
+  - docker run -it --rm python:3.9 bash -c "
+      curl https://sdk.cloud.google.com | bash > /dev/null;
+      source $HOME/google-cloud-sdk/path.bash.inc;
+      gcloud components update kubectl;
+      gcloud auth activate-service-account --key-file service-account.json;
+      gcloud config set project fincalc-430420;
+      gcloud config set compute/zone us-central1;
+      gcloud container clusters get-credentials autopilot-cluster-1;
+      echo \"$DOCKER_PASSWORD\" | docker login -u \"$DOCKER_USERNAME\" --password-stdin;
+      docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client;
+      docker run -e CI=true itsmesohit/client-test npm test;
+      bash ./deploy.sh;
+    "
 
 deploy:
   provider: script
