@@ -4,12 +4,15 @@ services:
   - docker
 
 before_install:
-  # Pull the Python Docker image
   - docker pull python:3.9
   
 install:
-  # Install Google Cloud SDK
-  - curl https://sdk.cloud.google.com | bash
+  - |
+    if [ ! -d "$HOME/google-cloud-sdk" ]; then
+      curl https://sdk.cloud.google.com | bash;
+    else
+      echo "Google Cloud SDK is cached";
+    fi
   - source $HOME/google-cloud-sdk/path.bash.inc
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
@@ -18,18 +21,19 @@ install:
   - gcloud container clusters get-credentials autopilot-cluster-1
 
 script:
-  # Login to Docker registry
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  
-  # Build Docker image
   - docker build -t itsmesohit/client-test -f ./client/Dockerfile.dev ./client
-  
-  # Run tests
   - docker run -e CI=true itsmesohit/client-test npm test
 
 deploy:
-  # Deploy using deploy.sh
   provider: script
   script: bash ./deploy.sh
   on:
     branch: main
+
+cache:
+  directories:
+    - $HOME/google-cloud-sdk
+
+timeout:
+  - 30
