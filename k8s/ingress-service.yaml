@@ -8,10 +8,22 @@ metadata:
     # ADD ANNOTATION
     nginx.ingress.kubernetes.io/rewrite-target: /$1
     # ADD ANNOTATION
+    
+    # letsencrypt.org
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/ssl-redirect: 'true'
 spec:
+  # tls:
+  #   - hosts:
+  #       - itsmesohit.in
+  #       - www.itsmesohit.in
+  #     secretName: itsmesohit-in
   ingressClassName: nginx
   # ADD INGRESSCLASSNAME FIELD
   rules:
+    # - host: itsmesohit.in
+    #   http:
+    #     paths:           #modify the rules field
     - http:
         paths:
           - path: /?(.*)
