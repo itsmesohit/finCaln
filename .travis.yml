@@ -7,17 +7,20 @@ before_install:
   - docker pull python:3.9
 
 install:
-  - |
-    echo "Checking for existing Google Cloud SDK"
-    if [ ! -d "$HOME/google-cloud-sdk" ]; then
-      echo "Google Cloud SDK not found, installing..."
-      curl https://sdk.cloud.google.com | bash
-      echo "Google Cloud SDK installed"
+  - echo "Checking for existing Google Cloud SDK"
+  - if [ ! -d "$HOME/google-cloud-sdk" ]; then
+      echo "Google Cloud SDK not found, installing...";
+      curl https://sdk.cloud.google.com | bash > /dev/null;
     else
-      echo "Google Cloud SDK is cached"
+      echo "Google Cloud SDK is cached";
     fi
   - echo "Sourcing Google Cloud SDK"
-  - source $HOME/google-cloud-sdk/path.bash.inc
+  - if [ -f "$HOME/google-cloud-sdk/path.bash.inc" ]; then
+      source $HOME/google-cloud-sdk/path.bash.inc;
+    else
+      echo "Google Cloud SDK installation failed";
+      exit 1;
+    fi
   - gcloud components update kubectl
   - gcloud auth activate-service-account --key-file service-account.json
   - gcloud config set project fincalc-430420
@@ -40,6 +43,3 @@ deploy:
 cache:
   directories:
     - $HOME/google-cloud-sdk
-
-timeout:
-  - 30
