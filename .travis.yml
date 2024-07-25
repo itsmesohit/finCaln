@@ -11,7 +11,9 @@ install:
   - |
     if [ ! -d "$HOME/google-cloud-sdk" ]; then
       echo "Google Cloud SDK not found, installing..."
-      curl https://sdk.cloud.google.com | bash > /dev/null
+      curl -LO https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
+      tar -xf google-cloud-sdk-372.0.0-linux-x86_64.tar.gz
+      ./google-cloud-sdk/install.sh -q
       echo "Google Cloud SDK installed."
     else
       echo "Google Cloud SDK is cached."
