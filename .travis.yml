@@ -9,7 +9,8 @@ env:
     - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 
 before_install:
-  # Install Python 3.8
+  # Add deadsnakes PPA and install Python 3.8
+  - sudo add-apt-repository ppa:deadsnakes/ppa
   - sudo apt-get update
   - sudo apt-get install -y python3.8 python3.8-venv python3.8-dev
 
